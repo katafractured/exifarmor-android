@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ExifArmor</string>
+    <string name="pick_photos">Select Photos</string>
+    <string name="preview">Preview</string>
+    <string name="strip_metadata">Strip Metadata</string>
+    <string name="results">Results</string>
+    <string name="scan_again">Scan Again</string>
+    <string name="share">Share</string>
+    <string name="back">Back</string>
+    <string name="strip_options">Strip Options</string>
+    <string name="strip_all">All</string>
+    <string name="location_only">Location</string>
+    <string name="privacy_focused">Privacy</string>
+    <string name="gps_detected">GPS location detected</string>
+    <string name="fields_removed">fields removed</string>
+    <string name="photos_cleaned">photos cleaned</string>
+    <string name="remove_exif">Remove EXIF metadata from your photos</string>
+</resources>

@@ -1,0 +1,33 @@
+# Gradle
+.gradle/
+build/
+*.apk
+*.aar
+*.aab
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+local.properties
+
+# Keystore
+keystore.properties
+*.jks
+*.keystore
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+Thumbs.db
+desktop.ini
