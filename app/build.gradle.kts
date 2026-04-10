@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.exifinterface)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.gson)
 
     testImplementation(libs.junit)
