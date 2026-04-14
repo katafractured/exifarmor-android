@@ -39,6 +39,7 @@ import com.katafract.exifarmor.ui.HomeScreen
 import com.katafract.exifarmor.ui.PreviewScreen
 import com.katafract.exifarmor.ui.ResultsScreen
 import com.katafract.exifarmor.ui.theme.ExifArmorTheme
+import com.katafract.exifarmor.ui.theme.onBackgroundVariant
 import com.katafract.exifarmor.viewmodel.MainViewModel
 import com.katafract.exifarmor.viewmodel.Screen
 import kotlinx.coroutines.launch
