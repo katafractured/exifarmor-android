@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -39,6 +41,7 @@ fun ResultsScreen(
     results: List<StripResult>,
     onScanAgain: () -> Unit,
     onShare: () -> Unit,
+    onDone: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -46,20 +49,26 @@ fun ResultsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        // Header
+        // Header with clickable Done button
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .systemBarsPadding()
+                .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = "Done",
-                modifier = Modifier.size(24.dp),
-                tint = Color(0xFF10B981),
-            )
+            IconButton(
+                onClick = onDone,
+                modifier = Modifier.size(48.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = "Done",
+                    modifier = Modifier.size(24.dp),
+                    tint = Color(0xFF10B981),
+                )
+            }
             Text(
                 text = "Done",
                 fontSize = 20.sp,
