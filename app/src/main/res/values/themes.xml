@@ -1,10 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Post-splash app theme. AppCompat lineage is required by activity dependencies; the
+         actual app UI runs in MaterialTheme via Compose so colors here only matter for
+         the brief moment between splash exit and first composition. -->
     <style name="Base.Theme.ExifArmor" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/purple</item>
-        <item name="colorPrimaryDark">@color/purple_dark</item>
-        <item name="colorAccent">@color/amber</item>
+        <item name="colorPrimary">@color/kata_gold</item>
+        <item name="colorPrimaryDark">@color/kata_midnight</item>
+        <item name="colorAccent">@color/kata_gold</item>
+        <item name="android:windowBackground">@color/kata_midnight</item>
+        <!-- Edge-to-edge: status + nav bars transparent so Compose owns the chrome. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
+        <item name="android:enforceStatusBarContrast" tools:targetApi="29">false</item>
     </style>
 
     <style name="Theme.ExifArmor" parent="Base.Theme.ExifArmor" />
+
+    <!-- Android 12+ SplashScreen API (backported via core-splashscreen).
+         Brand background + launcher foreground as animated icon; postSplashScreenTheme
+         tells the system to swap into Theme.ExifArmor once installSplashScreen() is
+         dismissed in MainActivity. -->
+    <style name="Theme.ExifArmor.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/kata_midnight</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.ExifArmor</item>
+    </style>
+
 </resources>

@@ -4,13 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,22 +20,26 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.katafract.exifarmor.models.StripResult
+import kotlin.OptIn
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultsScreen(
     results: List<StripResult>,
@@ -44,130 +48,133 @@ fun ResultsScreen(
     onDone: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-    ) {
-        // Header with clickable Done button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .systemBarsPadding()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(
-                onClick = onDone,
-                modifier = Modifier.size(48.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Check,
-                    contentDescription = "Done",
-                    modifier = Modifier.size(24.dp),
-                    tint = Color(0xFF10B981),
-                )
-            }
-            Text(
-                text = "Done",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-        }
-
-        // Summary Card
-        val successCount = results.count { it.success }
-        val totalFields = results.sumOf { it.fieldsRemoved }
-        val failureCount = results.size - successCount
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(16.dp),
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = "$successCount photos cleaned · $totalFields fields removed",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-
-                if (failureCount > 0) {
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                // windowInsets handles the status bar inset; the top-level
+                // safeDrawingPadding() in MainActivity is the safety net.
+                windowInsets = TopAppBarDefaults.windowInsets,
+                title = {
                     Text(
-                        text = "$failureCount photo(s) failed",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                        text = "Done",
+                        style = MaterialTheme.typography.titleMedium,
                     )
-                }
-            }
-        }
-
-        // Results List
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                horizontal = 16.dp,
-                vertical = 12.dp,
-            ),
-        ) {
-            items(results) { result ->
-                ResultCard(result = result)
-            }
-        }
-
-        // Action Buttons
+                },
+                navigationIcon = {
+                    IconButton(onClick = rememberHapticClick(KataHaptic.Light) { onDone() }) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = "Done",
+                            modifier = Modifier.size(22.dp),
+                            tint = Color(0xFF33E680),
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
+            )
+        },
+    ) { padding ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+                .fillMaxSize()
+                .padding(padding),
         ) {
-            Button(
-                onClick = onShare,
+            // Summary Card
+            val successCount = results.count { it.success }
+            val totalFields = results.sumOf { it.fieldsRemoved }
+            val failureCount = results.size - successCount
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ),
-                shape = RoundedCornerShape(12.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(16.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Share,
-                    contentDescription = "Share",
-                    modifier = Modifier.padding(end = 8.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                )
-                Text(
-                    text = "Share Cleaned Photos",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = "$successCount photos cleaned · $totalFields fields removed",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+
+                    if (failureCount > 0) {
+                        Text(
+                            text = "$failureCount photo(s) failed",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                        )
+                    }
+                }
             }
 
-            OutlinedButton(
-                onClick = onScanAgain,
+            // Results List
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(
+                    horizontal = 16.dp,
+                    vertical = 12.dp,
+                ),
+            ) {
+                items(results) { result ->
+                    ResultCard(result = result)
+                }
+            }
+
+            // Action Buttons
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp),
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text(
-                    text = "Strip More Photos",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
+                Button(
+                    onClick = rememberHapticClick { onShare() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Share,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(18.dp)
+                            .padding(end = 6.dp),
+                    )
+                    Text(
+                        text = "Share Cleaned Photos",
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = rememberHapticClick(KataHaptic.Light) { onScanAgain() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text(
+                        text = "Strip More Photos",
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
             }
         }
     }
@@ -181,7 +188,7 @@ fun ResultCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surface)
             .padding(12.dp),
     ) {
@@ -195,8 +202,7 @@ fun ResultCard(
         ) {
             Text(
                 text = result.originalMetadata.filename,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -210,33 +216,31 @@ fun ResultCard(
                     Icon(
                         imageVector = Icons.Filled.Check,
                         contentDescription = "Success",
-                        modifier = Modifier.size(20.dp),
-                        tint = Color(0xFF10B981),
+                        modifier = Modifier.size(18.dp),
+                        tint = Color(0xFF33E680),
                     )
                     Text(
                         text = "Clean",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF10B981),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF33E680),
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Failed",
-                        modifier = Modifier.size(20.dp),
-                        tint = Color(0xFFEF4444),
+                        modifier = Modifier.size(18.dp),
+                        tint = Color(0xFFFF4040),
                     )
                     Text(
                         text = "Failed",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFFEF4444),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFFFF4040),
                     )
                 }
             }
         }
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
@@ -249,8 +253,7 @@ fun ResultCard(
             ) {
                 Text(
                     text = "${result.fieldsRemoved} field${if (result.fieldsRemoved != 1) "s" else ""} removed",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
@@ -269,7 +272,7 @@ fun ResultCard(
                 if (removed.isNotEmpty()) {
                     Text(
                         text = removed.joinToString(", "),
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,
                     )
@@ -278,9 +281,8 @@ fun ResultCard(
         } else {
             Text(
                 text = "Error: ${result.error ?: "Unknown error"}",
-                fontSize = 11.sp,
-                color = Color(0xFFEF4444),
-                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFFFF4040),
             )
         }
     }
