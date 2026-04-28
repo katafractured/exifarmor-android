@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,9 +18,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.outlined.LocationOff
+import androidx.compose.material.icons.outlined.NoPhotography
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -33,10 +38,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.katafract.exifarmor.ui.theme.onBackgroundVariant
 
 @Composable
@@ -63,36 +66,43 @@ fun HomeScreen(
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState()),
     ) {
-        // Header Section
+        // Header Section — gold-ringed seal echo of the iOS LaunchSplashView.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(start = 24.dp, end = 24.dp, top = 32.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Icon(
-                imageVector = Icons.Filled.Lock,
-                contentDescription = "Privacy shield",
+            Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .padding(bottom = 16.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
+                    .size(96.dp)
+                    .clip(RoundedCornerShape(percent = 50))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Lock,
+                    contentDescription = null,
+                    modifier = Modifier.size(44.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "EXIF ARMOR",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.ExtraBold,
-                modifier = Modifier.padding(bottom = 8.dp),
+                text = "ExifArmor",
+                style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
+            Spacer(modifier = Modifier.height(6.dp))
+
             Text(
-                text = "Strip metadata. Own your privacy.",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
+                text = "Strip. Share. Stay private.",
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackgroundVariant,
-                modifier = Modifier.padding(bottom = 24.dp),
+                textAlign = TextAlign.Center,
             )
         }
 
@@ -101,25 +111,25 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             FeaturePill(
-                icon = Icons.Filled.Image,
+                icon = Icons.Outlined.LocationOff,
                 title = "GPS removal",
                 description = "Strip location data",
             )
             FeaturePill(
-                icon = Icons.Filled.Info,
+                icon = Icons.Outlined.NoPhotography,
                 title = "Device info",
                 description = "Remove camera & device details",
             )
             FeaturePill(
-                icon = Icons.Filled.Lock,
+                icon = Icons.Outlined.Schedule,
                 title = "Timestamps",
                 description = "Delete capture date & time",
             )
             FeaturePill(
-                icon = Icons.Filled.Image,
+                icon = Icons.Outlined.PhotoLibrary,
                 title = "Batch clean",
                 description = "Process multiple photos at once",
             )
@@ -133,7 +143,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Button(
-                onClick = {
+                onClick = rememberHapticClick {
                     launcher.launch("image/*")
                 },
                 modifier = Modifier
@@ -141,24 +151,27 @@ fun HomeScreen(
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Image,
-                    contentDescription = "Select photos",
-                    modifier = Modifier.padding(end = 8.dp),
+                    imageVector = Icons.Outlined.PhotoLibrary,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .padding(end = 4.dp),
                 )
+                Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = "Select Photos",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
 
             Text(
                 text = "Shared photos appear automatically",
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onBackgroundVariant,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -168,7 +181,7 @@ fun HomeScreen(
         }
 
         // Spacer
-        Box(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Pricing/Upgrade Section
         if (!isPro) {
@@ -176,36 +189,34 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(14.dp))
                     .background(MaterialTheme.colorScheme.primaryContainer)
                     .padding(16.dp),
             ) {
                 Text(
                     text = "Free: up to 5 photos",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
 
                 Text(
                     text = "Pro unlocks batch cleaning",
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                     modifier = Modifier.padding(top = 4.dp),
                 )
 
                 OutlinedButton(
-                    onClick = onUpgradeClick,
+                    onClick = rememberHapticClick { onUpgradeClick() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 12.dp)
                         .height(40.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(10.dp),
                 ) {
                     Text(
                         text = "Upgrade to Pro · \$3.99",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.labelMedium,
                     )
                 }
             }
@@ -214,7 +225,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(14.dp))
                     .background(Color(0xFF10B981).copy(alpha = 0.15f))
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -229,8 +240,7 @@ fun HomeScreen(
                 )
                 Text(
                     text = "Pro · Unlimited batch cleaning",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.labelMedium,
                     color = Color(0xFF10B981),
                 )
             }
@@ -248,31 +258,38 @@ private fun FeaturePill(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = title,
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.primary,
-        )
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
 
         Column(
             modifier = Modifier.weight(1f),
         ) {
             Text(
                 text = title,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = description,
-                fontSize = 11.sp,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

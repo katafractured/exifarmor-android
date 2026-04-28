@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Kata brand tokens (mirror app/src/main/java/.../ui/theme/Color.kt) -->
+    <color name="kata_gold">#C69838</color>
+    <color name="kata_midnight">#0A0A14</color>
+    <color name="kata_ice">#EBF0F7</color>
+
+    <!-- Legacy color names — kept until any layout/Java still references them. -->
     <color name="purple">#8B5CF6</color>
     <color name="purple_dark">#6D28D9</color>
     <color name="gray">#6B7280</color>

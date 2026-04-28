@@ -4,13 +4,22 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -35,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.katafract.exifarmor.ui.HomeScreen
 import com.katafract.exifarmor.ui.PreviewScreen
 import com.katafract.exifarmor.ui.ResultsScreen
@@ -48,14 +58,33 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
+    /**
+     * Flips true once Compose has had at least one frame to lay out, so the
+     * Android 12 splash dismisses on a real first-paint (no white flash).
+     */
+    @Volatile
+    private var splashReady: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Splash MUST be installed before super.onCreate; gate it on a quick
+        // ready flag so the first paint already has the model wired (no flash).
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        // Edge-to-edge: status + navigation bars become transparent and Compose
+        // is responsible for honoring window insets via safeDrawingPadding().
+        enableEdgeToEdge()
+
+        // Keep splash up for one Choreographer frame after content is set, so
+        // the first paint already has the Compose root attached (no flash). The
+        // gate flips inside `setContent { ... }` below via `splashReady`.
+        splashScreen.setKeepOnScreenCondition { !splashReady }
 
         // Handle incoming intents (share/send)
         handleIntent(intent)
 
         setContent {
             ExifArmorTheme {
+                LaunchedEffect(Unit) { splashReady = true }
                 MainScreenContent(viewModel, activity = this@MainActivity)
             }
         }
@@ -123,52 +152,71 @@ private fun MainScreenContent(
         color = MaterialTheme.colorScheme.background,
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                // safeDrawingPadding handles status bar + nav bar + IME insets so
+                // edge-to-edge screens never paint behind opaque chrome.
+                .safeDrawingPadding(),
         ) {
-            when (screen.value) {
-                Screen.HOME -> {
-                    HomeScreen(
-                        isPro = isPro.value,
-                        onPhotosSelected = { uris ->
-                            viewModel.loadPhotos(uris)
-                        },
-                        onUpgradeClick = {
-                            viewModel.launchBilling(activity)
-                        },
-                    )
-                }
+            // AnimatedContent wraps the screen swap so navigation gets a real
+            // transition (slide+fade) instead of an abrupt cut.
+            AnimatedContent(
+                targetState = screen.value,
+                transitionSpec = {
+                    val forward = isForwardTransition(initialState, targetState)
+                    val direction = if (forward) 1 else -1
+                    (slideInHorizontally(animationSpec = tween(280)) { it * direction } +
+                        fadeIn(animationSpec = tween(220))) togetherWith
+                        (slideOutHorizontally(animationSpec = tween(280)) { -it * direction } +
+                            fadeOut(animationSpec = tween(220)))
+                },
+                label = "screen-transition",
+            ) { current ->
+                when (current) {
+                    Screen.HOME -> {
+                        HomeScreen(
+                            isPro = isPro.value,
+                            onPhotosSelected = { uris ->
+                                viewModel.loadPhotos(uris)
+                            },
+                            onUpgradeClick = {
+                                viewModel.launchBilling(activity)
+                            },
+                        )
+                    }
 
-                Screen.PREVIEW -> {
-                    PreviewScreen(
-                        photos = photoList.value,
-                        currentOptions = stripOptions.value,
-                        isPro = isPro.value,
-                        onOptionsChanged = { options ->
-                            viewModel.updateOptions(options)
-                        },
-                        onStrip = {
-                            viewModel.startStrip()
-                        },
-                        onBack = {
-                            viewModel.reset()
-                        },
-                    )
-                }
+                    Screen.PREVIEW -> {
+                        PreviewScreen(
+                            photos = photoList.value,
+                            currentOptions = stripOptions.value,
+                            isPro = isPro.value,
+                            onOptionsChanged = { options ->
+                                viewModel.updateOptions(options)
+                            },
+                            onStrip = {
+                                viewModel.startStrip()
+                            },
+                            onBack = {
+                                viewModel.reset()
+                            },
+                        )
+                    }
 
-                Screen.PROCESSING -> {
-                    ProcessingScreen(progress = processingProgress.value)
-                }
+                    Screen.PROCESSING -> {
+                        ProcessingScreen(progress = processingProgress.value)
+                    }
 
-                Screen.DONE -> {
-                    ResultsScreen(
-                        results = stripResults.value,
-                        onScanAgain = {
-                            viewModel.reset()
-                        },
-                        onShare = {
-                            viewModel.shareResults(activity)
-                        },
-                    )
+                    Screen.DONE -> {
+                        ResultsScreen(
+                            results = stripResults.value,
+                            onScanAgain = {
+                                viewModel.reset()
+                            },
+                            onShare = {
+                                viewModel.shareResults(activity)
+                            },
+                        )
+                    }
                 }
             }
 
@@ -229,6 +277,18 @@ private fun MainScreenContent(
     }
 }
 
+/**
+ * Treat HOME -> PREVIEW -> PROCESSING -> DONE as forward; anything else
+ * (Done -> Home etc.) slides back. Keeps the gesture intuitive without
+ * pulling in a NavController.
+ */
+private fun isForwardTransition(from: Screen, to: Screen): Boolean {
+    val order = listOf(Screen.HOME, Screen.PREVIEW, Screen.PROCESSING, Screen.DONE)
+    val a = order.indexOf(from)
+    val b = order.indexOf(to)
+    return if (a < 0 || b < 0) true else b > a
+}
+
 @Composable
 private fun ProcessingScreen(progress: Float) {
     Box(
@@ -244,11 +304,13 @@ private fun ProcessingScreen(progress: Float) {
             CircularProgressIndicator(
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                strokeWidth = 3.dp,
             )
 
             Text(
-                text = "Processing...",
-                style = MaterialTheme.typography.bodyLarge,
+                text = "Stripping metadata",
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
@@ -261,7 +323,7 @@ private fun ProcessingScreen(progress: Float) {
 
             Text(
                 text = "${(progress * 100).toInt()}%",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onBackgroundVariant,
             )
         }
