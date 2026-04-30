@@ -23,7 +23,7 @@ class BillingManager(
         .build()
 
     companion object {
-        const val PROD_PRO = "com.katafract.exifarmor.pro"
+        const val PROD_PRO = "com.katafract.exifarmor.unlock"
         const val PROD_TIP_SMALL  = "com.katafract.exifarmor.tip.small"
         const val PROD_TIP_MEDIUM = "com.katafract.exifarmor.tip.medium"
         const val PROD_TIP_LARGE  = "com.katafract.exifarmor.tip.large"

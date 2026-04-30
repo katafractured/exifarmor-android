@@ -215,7 +215,7 @@ fun HomeScreen(
                     shape = RoundedCornerShape(10.dp),
                 ) {
                     Text(
-                        text = "Upgrade to Pro · \$3.99",
+                        text = "Unlock · \$0.99",
                         style = MaterialTheme.typography.labelMedium,
                     )
                 }
