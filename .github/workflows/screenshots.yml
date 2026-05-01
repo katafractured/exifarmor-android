@@ -8,15 +8,6 @@ name: Screenshots
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'app/src/main/java/**/ui/**'
-      - 'app/src/main/java/**/MainActivity.kt'
-      - 'app/src/androidTest/**/ScreenshotTest.kt'
-      - 'fastlane/metadata/android/en-US/images/**'
-      - '.github/workflows/screenshots.yml'
-
 concurrency:
   group: screenshots-${{ github.ref }}
   cancel-in-progress: true
